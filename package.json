@@ -8,9 +8,8 @@
     "gulp-watch": "^4.3.5",
     "browserify": "^11.0.1",
     "watchify": "^3.3.1",
+    "gulp-uglify": "^1.4.0",
     "vinyl-source-stream": "^1.1.0",
-
-    "font-awesome": "^4.4.0",
-    "underscore": "https://github.com/kasparsb/underscore/archive/master.tar.gz"
+    "vinyl-buffer": "^1.0.0"
   }
 }
