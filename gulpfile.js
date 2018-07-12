@@ -8,6 +8,8 @@ var less = require('gulp-less');
 var uglify = require('gulp-uglify');
 var buffer = require('vinyl-buffer');
 
+var babelify = require('babelify');
+
 // Read package info
 var pkg = require('./package.json');
 
@@ -47,26 +49,18 @@ function bundleJs(browserify, compress) {
 
     var destFileName = 'app.min-'+pkg.version+'.js';
 
+    var s = browserify
+        .transform('babelify', {presets: ['env']})
+        .bundle()
+        .on('error', handleError)
+        .pipe(source(destFileName));
+
     if (compress) {
         console.log('Uglify js');
-        browserify
-            .bundle()
-            .on('error', handleError)
-            .pipe(source('app.js'))
-            .pipe(buffer())
-            .pipe(uglify())
-            .pipe(rename(destFileName))
-            .pipe(gulp.dest(files.dest));
-    }
-    else {
-        browserify
-            .bundle()
-            .on('error', handleError)
-            .pipe(source('app.js'))
-            .pipe(rename(destFileName))
-            .pipe(gulp.dest(files.dest));    
+        s = s.pipe(buffer()).pipe(uglify())
     }
     
+    s.pipe(gulp.dest(files.dest));
 }
 
 function bundleLess(compress) {
