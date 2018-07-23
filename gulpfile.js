@@ -37,9 +37,13 @@ function getBrowserify(entry) {
  * Bundel js from browserify
  * If compress is true, then uglify js
  */
-function bundleJs(browserify, compress) {
+function bundleJs(browserify, compress, firstRun) {
     if (typeof compress == 'undefined') {
         compress = true;
+    }
+
+    if (typeof firstRun == 'undefined') {
+        firstRun = true;
     }
 
     var handleError = function(er){
@@ -49,8 +53,17 @@ function bundleJs(browserify, compress) {
 
     var destFileName = 'app.min-'+pkg.version+'.js';
 
-    var s = browserify
-        .transform('babelify', {presets: ['env']})
+    var s = browserify;
+
+    /**
+     * Watchify un Babel gadījumā vajag tikai vienreiz uzstādīt transfor
+     * pretējā gadījumā ar katru watchify update eventu transform paliek lēnāks
+     */
+    if (firstRun) {
+        s = s.transform('babelify', {presets: ['env']})
+    }
+
+    s = s
         .bundle()
         .on('error', handleError)
         .pipe(source(destFileName));
@@ -91,13 +104,18 @@ gulp.task('js', function(){
 });
 
 gulp.task('watchjs', function(){
+
     var w = watchify(
         getBrowserify(files.js, false)
     );
     
+    var first = true;
     w.on('update', function(){
         // bundle without compression for faster response
-        bundleJs(w, false);
+        bundleJs(w, false, first);
+
+        first = false;
+
         console.log('js files updated');
     });
 
