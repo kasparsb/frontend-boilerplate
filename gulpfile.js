@@ -130,11 +130,13 @@ function bundleLess(compress) {
         .pipe(gulp.dest(files.dest));
 }
 
-gulp.task('js', function(){
+function js(cb){
     bundleJs(getBrowserify(files.js));
-});
 
-gulp.task('watchjs', function(){
+    cb();
+};
+
+function watchjs(cb){
 
     var w = watchify(
         getBrowserify(files.js, false)
@@ -151,18 +153,24 @@ gulp.task('watchjs', function(){
     });
 
     w.bundle().on('data', function() {});
-});
 
-gulp.task('less', function(){
-    bundleLess()
-});
+    cb();
+};
 
-gulp.task('watchless', function(){
+function less2(cb){
+    bundleLess();
+
+    cb();
+}
+
+function watchless(cb){
     watch([files.lesss], function(){
         console.log('less files updated');
         bundleLess(false);
     });
-});
 
-gulp.task('default', ['watchjs', 'watchless']);
-gulp.task('dist', ['js', 'less']);
+    cb();
+};
+
+exports.default = gulp.series(watchjs, watchless);
+exports.dist = gulp.series(js, less2);
